@@ -1,0 +1,206 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="SignalFlow：上传营销Brief与渠道数据，自动生成增长诊断与执行建议。" />
+    <title>SignalFlow｜AI营销增长诊断台</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Noto+Sans+SC:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <header class="appbar">
+      <a class="brand" href="#top" aria-label="SignalFlow 首页">
+        <span class="brand-mark"><i></i><i></i><i></i></span>
+        <span>SignalFlow</span>
+      </a>
+      <div class="appbar-meta"><span class="status-dot"></span>AI 营销决策工具</div>
+    </header>
+
+    <main class="tool-page" id="top">
+      <section class="tool-heading">
+        <div>
+          <span class="eyebrow">AI MARKETING WORKSPACE</span>
+          <h1>AI营销增长诊断台</h1>
+          <p>输入项目Brief与渠道数据，生成指标诊断、策略建议和执行任务。</p>
+        </div>
+        <button class="button secondary" id="loadSample">载入完整示例</button>
+      </section>
+
+      <section class="guide" aria-label="操作指引">
+        <div><span>1</span><p><b>填写任务</b><small>明确目标、人群与产品</small></p></div>
+        <i>→</i>
+        <div><span>2</span><p><b>导入数据</b><small>上传文件或使用示例</small></p></div>
+        <i>→</i>
+        <div><span>3</span><p><b>生成诊断</b><small>获得洞察与执行建议</small></p></div>
+      </section>
+
+      <section class="input-grid">
+        <article class="tool-card brief-card">
+          <div class="card-heading"><div><span>01 · PROJECT BRIEF</span><h2>营销任务</h2></div><small>用于确定分析目标</small></div>
+          <div class="form-grid">
+            <label class="field span-3"><span>项目名称</span><input id="projectName" placeholder="例如：xxxx新品上市整合营销" /></label>
+            <fieldset class="field span-3 goal-field">
+              <legend>核心目标 <small>可多选</small></legend>
+              <div class="goal-options" id="objectiveOptions">
+                <label><input type="checkbox" name="objective" value="awareness" checked /><span>提升品牌声量</span></label>
+                <label><input type="checkbox" name="objective" value="engagement" /><span>提升用户互动</span></label>
+                <label><input type="checkbox" name="objective" value="traffic" /><span>促进站外引流</span></label>
+                <label><input type="checkbox" name="objective" value="conversion" /><span>驱动销售转化</span></label>
+              </div>
+            </fieldset>
+            <label class="field"><span>项目标签</span><input id="projectTag" placeholder="例如：xxxx新品上市" /></label>
+            <label class="field"><span>整体预算（元）</span><input id="budget" type="number" min="0" placeholder="300000" /></label>
+            <label class="field"><span>周期（天）</span><input id="duration" type="number" min="1" placeholder="21" /></label>
+            <label class="field span-3"><span>目标人群</span><input id="audience" placeholder="人群特征、兴趣与使用场景" /></label>
+            <label class="field span-3"><span>任务描述</span><textarea id="brief" rows="3" placeholder="传播背景、传播目标与传播动作"></textarea></label>
+          </div>
+        </article>
+
+        <article class="tool-card data-card">
+          <div class="card-heading"><div><span>02 · CHANNEL DATA</span><h2>渠道数据</h2></div><button class="link-button" id="downloadTemplate">下载模板</button></div>
+          <label class="upload-zone" id="dropZone">
+            <input id="csvInput" type="file" accept=".csv,.xlsx,.doc,.docx,.pdf,.png,.jpg,.jpeg,.webp,.bmp,text/csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/pdf,image/*" />
+            <span class="upload-icon">↥</span>
+            <div><b>上传数据文件</b><small id="uploadStatus">点击选择或拖入文件</small></div>
+          </label>
+          <div class="file-types"><span>CSV</span><span>XLSX</span><span>Word</span><span>PDF</span><span>PNG / JPG</span></div>
+          <button class="sample-button" id="sampleDataButton"><span>✦</span><div><b>使用示例数据</b><small>载入12条跨平台模拟记录</small></div><i>→</i></button>
+          <div class="data-preview" id="dataPreview">
+            <div class="empty-state"><span>0</span><p>尚未导入数据</p></div>
+          </div>
+          <div class="supported-fields"><span>支持字段</span><p>平台 · 内容 · 内容类型 · 达人类型 · 花费 · 曝光 · 观看 · 互动 · 点击 · 转化 · 转化价值</p></div>
+        </article>
+      </section>
+
+      <section class="run-bar">
+        <div><span class="shield">✓</span><p><b>本地数据处理</b><small>上传内容仅在当前浏览器中计算，不会被存储。</small></p></div>
+        <button class="button primary" id="analyzeButton">生成AI诊断 <b>✦</b></button>
+      </section>
+
+      <section class="results hidden" id="results">
+        <div class="results-heading">
+          <div><span>03 · DIAGNOSIS</span><h2 id="resultTitle">营销增长诊断</h2><p id="resultMeta"></p></div>
+          <button class="button secondary" id="restartButton">修改输入</button>
+        </div>
+
+        <div class="score-row">
+          <div class="score-ring" id="scoreRing"><span><strong id="overallScore">--</strong><small>/100</small></span></div>
+          <div class="score-copy"><span>CAMPAIGN HEALTH</span><h3 id="verdict">等待诊断</h3><p id="verdictText"></p></div>
+          <div class="top-signal"><span>首要机会</span><strong id="topOpportunity">--</strong><small id="topEvidence">--</small></div>
+        </div>
+
+        <section class="metric-workspace" aria-labelledby="metricWorkspaceTitle">
+          <div class="workspace-heading">
+            <div><span>METRIC CENTER</span><h3 id="metricWorkspaceTitle">核心指标</h3></div>
+            <small>固定结果 + 自选效率指标</small>
+          </div>
+          <div class="core-metric-grid" id="coreMetricGrid"></div>
+          <div class="metric-selector">
+            <div class="selector-copy"><b>选择需要计算的指标</b><small>点击指标即可显示或隐藏；悬停 ⓘ 查看公式</small></div>
+            <div class="metric-options" id="metricOptions" role="group" aria-label="可选计算指标">
+              <label><input type="checkbox" value="cpc" checked /><span>CPC <i class="formula-tag" tabindex="0" data-formula="广告总花费 ÷ 点击次数">ⓘ</i></span></label>
+              <label><input type="checkbox" value="cpm" checked /><span>CPM <i class="formula-tag" tabindex="0" data-formula="（广告费用 ÷ 展示次数）× 1000">ⓘ</i></span></label>
+              <label><input type="checkbox" value="cpv" checked /><span>CPV <i class="formula-tag" tabindex="0" data-formula="总广告成本 ÷ 总观看次数">ⓘ</i></span></label>
+              <label><input type="checkbox" value="cpa" checked /><span>CPA <i class="formula-tag" tabindex="0" data-formula="广告总花费 ÷ 转化次数">ⓘ</i></span></label>
+              <label><input type="checkbox" value="cpe" /><span>CPE <i class="formula-tag" tabindex="0" data-formula="广告总花费 ÷ 互动次数">ⓘ</i></span></label>
+              <label><input type="checkbox" value="cvr" checked /><span>转化率 <i class="formula-tag" tabindex="0" data-formula="（转化次数 ÷ 点击量）× 100%">ⓘ</i></span></label>
+              <label><input type="checkbox" value="er" checked /><span>互动率 <i class="formula-tag" tabindex="0" data-formula="（互动量 ÷ 曝光量）× 100%">ⓘ</i></span></label>
+              <label><input type="checkbox" value="ctr" checked /><span>点击率 <i class="formula-tag" tabindex="0" data-formula="（点击量 ÷ 曝光量）× 100%">ⓘ</i></span></label>
+              <label><input type="checkbox" value="vtr" /><span>观看率 <i class="formula-tag" tabindex="0" data-formula="（观看量 ÷ 曝光量）× 100%">ⓘ</i></span></label>
+              <label><input type="checkbox" value="roas" checked /><span>ROAS <i class="formula-tag" tabindex="0" data-formula="转化价值（销售额）÷ 广告总花费">ⓘ</i></span></label>
+            </div>
+          </div>
+          <div class="metric-grid" id="metricGrid"></div>
+        </section>
+
+        <article class="visualization-card" aria-labelledby="visualizationTitle">
+          <div class="visualization-heading">
+            <div><span>DATA VISUALIZATION</span><h3 id="visualizationTitle">数据可视化</h3><p>按分析目标选择维度、指标与图表形式</p></div>
+            <div class="chart-controls">
+              <label><span>对比维度</span><select id="vizDimension"><option value="platform">发布平台</option><option value="contentType">内容类型</option><option value="creatorType">达人类型</option></select></label>
+              <label><span>数据指标</span><select id="vizMetric"><option value="impressions">曝光量</option><option value="engagements">互动量</option><option value="views">观看量</option><option value="clicks">点击量</option><option value="conversions">转化量</option><option value="spend">广告花费</option><option value="revenue">转化价值</option><option value="cpc">CPC</option><option value="cpm">CPM</option><option value="cpv">CPV</option><option value="cpa">CPA</option><option value="cpe">CPE</option><option value="cvr">转化率</option><option value="er">互动率</option><option value="ctr">点击率</option><option value="vtr">观看率</option><option value="roas">ROAS</option></select></label>
+              <label><span>图表形式</span><select id="vizType"><option value="bar">柱状图</option><option value="line">折线图</option><option value="pie">饼状图</option></select></label>
+            </div>
+          </div>
+          <div class="chart-stage"><canvas id="dataChart" aria-label="营销数据可视化图表" role="img"></canvas></div>
+          <div class="chart-legend" id="chartLegend" aria-label="图表数据明细"></div>
+        </article>
+
+        <article class="combination-card" aria-labelledby="combinationTitle">
+          <div class="combination-heading">
+            <div><span>COMBINATION EFFECT</span><h3 id="combinationTitle">组合效果诊断</h3><p>交叉拆解两个维度，识别更值得复制的投放组合</p></div>
+            <div class="combo-controls">
+              <label><span>组合维度</span><select id="comboDimensions"><option value="platform|contentType">平台 × 内容类型</option><option value="contentType|creatorType">内容类型 × 达人类型</option><option value="platform|creatorType">平台 × 达人类型</option></select></label>
+              <label><span>评估侧重</span><select id="scoreProfile"><option value="balanced">综合均衡</option><option value="awareness">品牌声量</option><option value="engagement">用户互动</option><option value="traffic">站外引流</option><option value="conversion">销售转化</option><option value="custom">自定义规则</option></select></label>
+              <button class="score-rule-button" id="scoreRuleButton" type="button">评分规则 <i>ⓘ</i></button>
+            </div>
+          </div>
+          <div class="combo-summary" id="comboSummary"></div>
+          <div class="combo-layout">
+            <section class="ranking-panel"><div class="panel-title"><b>综合效果排名</b><span>TOP 8</span></div><div class="combo-ranking" id="comboRanking"></div></section>
+            <section class="heatmap-panel"><div class="panel-title"><b>交叉效果热力图</b><span>颜色越深，综合得分越高</span></div><div class="heatmap-scroll"><table class="combo-heatmap" id="comboHeatmap"></table></div></section>
+          </div>
+          <div class="method-note" id="comboMethod"></div>
+        </article>
+
+        <div class="result-grid">
+          <article class="result-card">
+            <div class="result-card-heading"><div><span>CHANNEL SIGNALS</span><h3>渠道效率</h3></div><small>综合互动、点击、转化与成本</small></div>
+            <div class="channel-bars" id="channelBars"></div>
+          </article>
+          <article class="result-card">
+            <div class="result-card-heading"><div><span>KEY INSIGHTS</span><h3>机会洞察</h3></div><small>结论附带数据证据</small></div>
+            <div class="insight-list" id="insightList"></div>
+          </article>
+        </div>
+
+        <article class="result-card strategy-card">
+          <div class="result-card-heading"><div><span>ACTION PLAN</span><h3>下一轮策略</h3></div><small>预算、内容、人群与实验</small></div>
+          <div class="strategy-grid" id="strategyGrid"></div>
+        </article>
+
+        <div class="result-grid final-grid">
+          <article class="result-card">
+            <div class="result-card-heading"><div><span>CREATIVE STARTER</span><h3>案例启发与创意假设</h3></div><small>案例启发 · 待验证方向</small></div>
+            <div id="creativeRoutes"></div>
+          </article>
+          <article class="result-card">
+            <div class="result-card-heading"><div><span>BRIEF → BUILD</span><h3>执行翻译</h3></div><small>给创意、媒介与技术中台</small></div>
+            <div id="translationList"></div>
+          </article>
+        </div>
+      </section>
+    </main>
+
+    <dialog class="score-dialog" id="scoreRuleDialog" aria-labelledby="scoreRuleTitle">
+      <div class="score-dialog-shell">
+        <header class="score-dialog-header"><div><span>SCORING LOGIC</span><h2 id="scoreRuleTitle">综合评分规则</h2></div><button type="button" id="closeScoreRule" aria-label="关闭评分规则">×</button></header>
+        <section class="current-rule-card">
+          <div><span>当前评估规则</span><strong id="currentRuleName">综合均衡</strong></div>
+          <p id="currentRuleFormula"></p>
+        </section>
+        <section class="score-steps">
+          <div><b>01</b><strong>同口径归一化</strong><p>同一指标在当前组合中进行 Min–Max 归一化，转换为 0–100 相对分。</p></div>
+          <div><b>02</b><strong>方向修正</strong><p>互动率、点击率等越高得分越高；CPC、CPA 等成本指标越低得分越高。</p></div>
+          <div><b>03</b><strong>加权求和</strong><p>按照所选评估侧重的指标权重计算加权平均；无差异指标自动剔除并重新分配权重。</p></div>
+          <div><b>04</b><strong>置信度修正</strong><p>最终得分 = 加权相对分 × [0.86 + 0.14 × min(1, 记录数 ÷ 3)]。</p></div>
+        </section>
+        <div class="relative-score-note"><b>请注意</b><span>综合得分用于当前导入数据中不同组合的横向比较，不代表行业绝对水平。1条、2条、3条及以上记录的置信度系数约为0.91、0.95、1.00。</span></div>
+        <section class="custom-rule-editor">
+          <div class="editor-heading"><div><span>CUSTOM FORMULA</span><h3>自定义综合评分</h3><p>选择指标、设置权重与计分方向，权重合计需等于100%。</p></div><button type="button" id="copyPresetRule">从当前预设开始</button></div>
+          <div class="custom-rule-head"><span>评分指标</span><span>权重</span><span>计分方向</span><span></span></div>
+          <div id="customRuleRows"></div>
+          <button class="add-rule-button" id="addRuleMetric" type="button">＋ 添加评分指标</button>
+          <div class="custom-rule-footer"><div><span>权重合计</span><strong id="customWeightTotal">100%</strong><small id="customRuleHint">权重设置有效</small></div><div><button class="button secondary" type="button" id="resetCustomRule">恢复均衡默认</button><button class="button primary" type="button" id="applyCustomRule">应用自定义规则</button></div></div>
+        </section>
+      </div>
+    </dialog>
+
+    <footer><span>SignalFlow</span><span>演示品牌与数据均为虚构 · AI辅助设计与开发</span></footer>
+    <div class="toast" id="toast" role="status"></div>
+    <script src="./app.js"></script>
+  </body>
+</html>
