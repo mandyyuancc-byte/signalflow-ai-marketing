@@ -346,22 +346,24 @@ $('#analyzeButton').addEventListener('click',analyze);
 function renderResults(brief,total,channels,content,creators){
   const best=channels[0],bestContent=content[0],bestCreator=creators[0],weakest=channels[channels.length-1];
   const budgetUse=brief.budget?total.spend/brief.budget:1,reachShare=best.impressions/total.impressions;
+  const highReach=[...channels].sort((a,b)=>b.impressions-a.impressions)[0];
+  const highestContentER=[...content].sort((a,b)=>b.er-a.er)[0];
+  const lowestCreatorCPA=[...creators].filter(item=>item.conversions>0).sort((a,b)=>a.cpa-b.cpa)[0]||bestCreator;
   let score=Math.round(60+Math.min(total.er*180,13)+Math.min(total.ctr*240,12)+Math.min(total.cvr*80,11)-Math.abs(1-budgetUse)*12);score=Math.max(50,Math.min(94,score));
   $('#resultTitle').textContent=brief.projectName;$('#resultMeta').textContent=`${brief.projectTag?`项目标签：${brief.projectTag} · `:''}目标：${objectiveName(brief.objective)} · ${rows.length}条记录 · ${channels.length}个平台`;
   $('#overallScore').textContent=score;$('#scoreRing').style.setProperty('--score',score);
   $('#verdict').textContent=score>=82?'增长信号清晰，可以扩大验证':score>=70?'结构健康，但仍有增量空间':'基础有效，需要优先修复效率短板';
-  $('#verdictText').textContent=`已使用${pct(budgetUse)}预算。${best.name}综合效率领先，${bestContent.name}是最值得复用的内容结构。`;
-  $('#topOpportunity').textContent=`放大「${bestContent.name} × ${best.name}」`;$('#topEvidence').textContent=`${best.name}效率${best.score}；${bestContent.name}互动率${pct(bestContent.er)}`;
+  $('#verdictText').textContent=`已使用${pct(budgetUse)}预算。当前共记录${rows.length}条内容、${channels.length}个平台，总曝光${fmt(total.impressions)}、总互动${fmt(total.engagements)}。`;
+  $('#topOpportunity').textContent=`曝光最高平台：${highReach.name}`;$('#topEvidence').textContent=`曝光 ${fmt(highReach.impressions)}；占总曝光 ${pct(highReach.impressions/total.impressions)}`;
   renderMetricWorkspace(total);
   renderVisualization();
   renderCombinationAnalysis();
   $('#channelBars').innerHTML=channels.map((c,i)=>`<div class="channel-row"><span>${safe(c.name)}</span><div class="bar-track"><div class="bar-fill" style="width:${Math.max(8,c.score)}%;opacity:${1-i*.12}"></div></div><b>${c.score}</b></div>`).join('');
-  const highReach=[...channels].sort((a,b)=>b.impressions-a.impressions)[0];
   const insights=[
-    [`${best.name}贡献最高质量流量`,`${best.name}效率${best.score}，点击率${pct(best.ctr)}、转化率${pct(best.cvr)}，贡献${pct(reachShare)}总曝光。`],
-    [`「${bestContent.name}」最接近行动`,`${bestContent.name}互动率${pct(bestContent.er)}，建议提炼开头、场景与证据结构。`],
-    [`${highReach.name}存在点击断点`,`${fmt(highReach.impressions)}次曝光对应${pct(highReach.ctr)}点击率，应优先优化前三秒与利益点。`],
-    [`${bestCreator.name}更适合承担转化`,`${bestCreator.name}转化率${pct(bestCreator.cvr)}、CPA${money(bestCreator.cpa)}。`]
+    [`${best.name}综合评分最高`,`${best.name}相对评分${best.score}，点击率${pct(best.ctr)}、转化率${pct(best.cvr)}，占总曝光${pct(reachShare)}。`],
+    [`${highestContentER.name}互动率最高`,`${highestContentER.name}共${highestContentER.count}条记录，互动率${pct(highestContentER.er)}，互动量${fmt(highestContentER.engagements)}。`],
+    [`${highReach.name}曝光量最高`,`${highReach.name}获得${fmt(highReach.impressions)}次曝光、${fmt(highReach.clicks)}次点击，点击率${pct(highReach.ctr)}。`],
+    [`${lowestCreatorCPA.name}单次转化成本最低`,`${lowestCreatorCPA.name}共${lowestCreatorCPA.count}条记录，转化${fmt(lowestCreatorCPA.conversions)}次，CPA${money(lowestCreatorCPA.cpa)}。`]
   ];
   $('#insightList').innerHTML=insights.map((x,i)=>`<div class="insight"><span>0${i+1}</span><div><strong>${safe(x[0])}</strong><p>${safe(x[1])}</p></div></div>`).join('');
   const move=Math.max(8,Math.min(18,Math.round((best.score-weakest.score)/3)));
